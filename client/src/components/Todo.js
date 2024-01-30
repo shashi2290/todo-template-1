@@ -14,6 +14,12 @@ function Todo({todoUpdated, setTodoUpdated}) {
     getTodos();
   }, [todoUpdated])
   console.log(todos)
+
+  const handleDelete = async (id) => {
+    setTodoUpdated(false)
+    await axios.delete(`http://localhost:8000/delete/${id}`);
+    setTodoUpdated(true)
+  }
   return (
     <>
       <table>
@@ -22,6 +28,7 @@ function Todo({todoUpdated, setTodoUpdated}) {
           <th>Description</th>
           <th>Status</th>
           <th>Priority</th>
+          <th>Action</th>
         </tr>
         {todos.map(todo => (
           <tr>
@@ -29,6 +36,7 @@ function Todo({todoUpdated, setTodoUpdated}) {
             <td>{todo.description}</td>
             <td>{todo.status ? "Done" : "Not Done "}</td>
             <td>{todo.priority}</td>
+            <td style={{textAlign: 'center'}} ><button style={{color: 'red', backgroundColor: 'yellow'}} onClick={() => handleDelete(todo._id)} >X</button></td>
           </tr>
         ))}
       </table>

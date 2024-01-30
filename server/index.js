@@ -6,12 +6,17 @@ const app = express();
 const cors = require('cors');
 app.use(cors());
 //db connect
-mongoose.connect('mongodb+srv://<user>:<pwd>@cluster0.edjrq.mongodb.net/?retryWrites=true&w=majority', {useNewUrlParser: true});
-const db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-  console.log('connected to db');
-});
+const connectDB = async () => {
+  try {
+    const pwd = encodeURIComponent('xxxxx');
+    await mongoose.connect(`mongodb+srv://shashi:xxx@cluster0.edjrq.mongodb.net/?retryWrites=true&w=majority`);
+    console.log('connected')
+  }catch(err) {
+    console.log(err);
+  }
+}
+
+connectDB();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -19,8 +24,13 @@ app.use(express.urlencoded({ extended: true }));
 
 // create a get request
 app.get('/', async (req, res) => {
-  const todos = await Todo.find();
-  if(!todos.length) {
+  let todos;
+  try{
+    todos = await Todo.find();
+  } catch(err) {
+    console.log(err);
+  }
+  if(!todos && !todos.length) {
     return res.json({
       success: false
     });
@@ -32,7 +42,7 @@ app.get('/', async (req, res) => {
 });
 
 //create a post api
-app.post('/', async (req, res) => {
+app.post('/create', async (req, res) => {
   console.log(req.body)
   const todo = new Todo({
     title: req.body.title,
@@ -52,7 +62,22 @@ app.post('/', async (req, res) => {
       message: err.message
     })
   })
-  
+});
+
+app.delete('/delete/:id', async(req, res) => {
+  const id = req.params.id;
+  const todo = await Todo.findByIdAndDelete(id);
+
+  if(!todo) {
+    res.json({
+      success: false,
+      message: "Id not found"
+    })
+  }
+  res.json({
+    success: true,
+    message: "Todo deleted"
+  })
 })
 
 const port = 8000;
