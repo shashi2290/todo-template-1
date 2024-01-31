@@ -4,13 +4,16 @@ const mongoose = require('mongoose');
 const Todo = require('./models/Todo');
 const app = express();
 const cors = require('cors');
+const authRoutes = require('./routes/auth');
+const authenticate = require('./middlewares/authenticate')
 app.use(cors());
 //db connect
 const connectDB = async () => {
   try {
     const pwd = encodeURIComponent('xxxxx');
-    await mongoose.connect(`mongodb+srv://shashi:xxx@cluster0.edjrq.mongodb.net/?retryWrites=true&w=majority`);
-    console.log('connected')
+    await mongoose.connect(`mongodb+srv://shashi:madhuri23@cluster0.edjrq.mongodb.net/?retryWrites=true&w=majority`);
+    // await mongoose.connect(`mongodb://127.0.0.1:27017/`);
+    console.log('connected to cloud atlas db')
   }catch(err) {
     console.log(err);
   }
@@ -21,9 +24,11 @@ connectDB();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+app.use('/auth', authRoutes);
 
 // create a get request
-app.get('/', async (req, res) => {
+//Protected route
+app.get('/', authenticate , async (req, res) => {
   let todos;
   try{
     todos = await Todo.find();
@@ -43,7 +48,7 @@ app.get('/', async (req, res) => {
 
 //create a post api
 app.post('/create', async (req, res) => {
-  console.log(req.body)
+  
   const todo = new Todo({
     title: req.body.title,
     description: req.body.description,
@@ -52,6 +57,7 @@ app.post('/create', async (req, res) => {
   });
 
   todo.save().then((todo) => {
+    console.log("POST CREATED", todo)
     return res.json({
       success: true,
       todo

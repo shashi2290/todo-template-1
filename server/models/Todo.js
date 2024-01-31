@@ -8,7 +8,8 @@ const todoSchema = new mongoose.Schema({
   priority: {
     type: String,
     enum: ['low', 'med', 'high']
-  }
+  },
+  userId: {type: mongoose.Schema.Types.ObjectId, ref: 'User'}
 });
 
 module.exports = mongoose.model('Todo', todoSchema)

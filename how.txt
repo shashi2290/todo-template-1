@@ -1,0 +1,13 @@
+
+Frontend ----
+create a new route - React Router 
+login Registration - page 1
+- todo page2
+logout page page 3 - after logout redirect to this page
+
+backend --- Done
+jwt auth
+-new api for 
+ - login - done 
+ - Registration - done 
+ - Authentication (jwt bearer token)- middleware - done

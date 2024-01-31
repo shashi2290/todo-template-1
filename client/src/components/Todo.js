@@ -31,7 +31,7 @@ function Todo({todoUpdated, setTodoUpdated}) {
           <th>Action</th>
         </tr>
         {todos.map(todo => (
-          <tr>
+          <tr key={todo._id} >
             <td>{todo.title}</td>
             <td>{todo.description}</td>
             <td>{todo.status ? "Done" : "Not Done "}</td>
