@@ -4,11 +4,14 @@ import './Todo.css';
 
 function Todo({todoUpdated, setTodoUpdated}) {
   const [todos, setTodos] = useState([]);
+  const [username, setUsername] = useState('Namaste Guest');
   
   useEffect(() => {
     const getTodos = async () => {
-      const res = await axios.get('http://localhost:8000/');
-      setTodos(res.data.todos);
+      const res = await axios.get('http://localhost:8000/', {headers: {authorization: `Bearer ${localStorage.getItem('token')}`}});
+      const {data: {todos: userTodos, username}} = res
+      setUsername(username)
+      setTodos(userTodos);
       setTodoUpdated(false)
     }
     getTodos();
@@ -17,12 +20,16 @@ function Todo({todoUpdated, setTodoUpdated}) {
 
   const handleDelete = async (id) => {
     setTodoUpdated(false)
-    await axios.delete(`http://localhost:8000/delete/${id}`);
+    await axios.delete(`http://localhost:8000/delete/${id}`, {headers: {authorization: `Bearer ${localStorage.getItem('token')}`}});
     setTodoUpdated(true)
   }
+  
   return (
-    <>
-      <table>
+    <div style={{position: 'relative', justifyContent: 'center'}}>
+      <h1 style={{textAlign: 'center', color: 'turquoise'}}>{username}'s Todo  List</h1>
+      <button style={{color: 'red', backgroundColor: 'yellow', borderRadius: '10px', position: 'absolute', left: '85%', top: '5%'}} onClick={() => {localStorage.removeItem('token'); window.location.href = '/thanks';}} >Logout</button>
+      {todos.length ? (
+        <table style={{width: '80%', margin: 'auto', textAlign: 'center'}}>
         <tr>
           <th>Title</th>
           <th>Description</th>
@@ -40,7 +47,10 @@ function Todo({todoUpdated, setTodoUpdated}) {
           </tr>
         ))}
       </table>
-    </>
+      ) : (
+        <h1>Please add Todos to continue</h1>
+      )}
+    </div>
   )
 }
 

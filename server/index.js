@@ -5,13 +5,14 @@ const Todo = require('./models/Todo');
 const app = express();
 const cors = require('cors');
 const authRoutes = require('./routes/auth');
-const authenticate = require('./middlewares/authenticate')
+const authenticate = require('./middlewares/authenticate');
+const User = require('./models/User');
 app.use(cors());
 //db connect
 const connectDB = async () => {
   try {
     const pwd = encodeURIComponent('xxxxx');
-    await mongoose.connect(`mongodb+srv://shashi:madhuri23@cluster0.edjrq.mongodb.net/?retryWrites=true&w=majority`);
+    await mongoose.connect(`mongodb+srv://shashi:xxx@cluster0.edjrq.mongodb.net/?retryWrites=true&w=majority`);
     // await mongoose.connect(`mongodb://127.0.0.1:27017/`);
     console.log('connected to cloud atlas db')
   }catch(err) {
@@ -29,9 +30,14 @@ app.use('/auth', authRoutes);
 // create a get request
 //Protected route
 app.get('/', authenticate , async (req, res) => {
-  let todos;
+  const {userId} = req;
+  let todos, user;
   try{
-    todos = await Todo.find();
+    user = await User.findById(userId);
+    todos = await Todo.find({
+      userId
+    });
+
   } catch(err) {
     console.log(err);
   }
@@ -42,18 +48,19 @@ app.get('/', authenticate , async (req, res) => {
   }
   return res.json({
     success: true,
-    todos
+    todos,
+    username: user.username
   });
 });
 
 //create a post api
-app.post('/create', async (req, res) => {
-  
+app.post('/create', authenticate, async (req, res) => {
   const todo = new Todo({
     title: req.body.title,
     description: req.body.description,
     status: req.body.status,
-    priority: req.body.priority
+    priority: req.body.priority,
+    userId: req.userId
   });
 
   todo.save().then((todo) => {
@@ -70,9 +77,17 @@ app.post('/create', async (req, res) => {
   })
 });
 
-app.delete('/delete/:id', async(req, res) => {
-  const id = req.params.id;
-  const todo = await Todo.findByIdAndDelete(id);
+app.delete('/delete/:id', authenticate, async(req, res) => {
+  const todoId = req.params.id;
+  const {userId} = req;
+  try{
+    var todo = await Todo.findOneAndDelete({userId, _id: todoId});
+  } catch(err) {
+    res.status(500).json({
+      success: false,
+      error: "Todo Not Deleted..."
+    })
+  }
 
   if(!todo) {
     res.json({

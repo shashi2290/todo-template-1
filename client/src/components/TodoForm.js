@@ -41,13 +41,12 @@ function TodoForm({setTodoUpdated}) {
 
   const handleSubmit = async () => {
     try {
-      const res = await axios.post('http://localhost:8000/create', formState);
+      const res = await axios.post('http://localhost:8000/create', formState, {headers: {authorization: `Bearer ${localStorage.getItem('token')}`}});
       setFormState({title: '', description: '', status: false, priority: 'low'});
       setTodoUpdated(true);
     } catch (error) {
       console.log(error);
     }
-    
   }
   console.log(formState);
   return (
