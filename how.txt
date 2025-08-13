@@ -11,3 +11,4 @@ jwt auth
  - login - done 
  - Registration - done 
  - Authentication (jwt bearer token)- middleware - done
+- test
